@@ -21,23 +21,29 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-session-token: ${{secrets.AWS_SESSION_TOKEN}}
           aws-region: us-east-1
-
+      
+      # installs terraform cli in the runner
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
 
+      # sets up cli environment
       - name: Terraform Initialize
         run: terraform init
 
+      # validates .tf file
       - name: Terraform Validate
         run: terraform validate 
 
+      # calculates plan of terraform activities which will be needed
       - name: Terraform Plan
         run: terraform plan 
         continue-on-error: true
 
+      # create the resources only if update was a push to main branch
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: terraform apply -auto-approve
 
+      # delete the resources
       - name: Terraform Destroy
         run:  terraform plan -destroy
